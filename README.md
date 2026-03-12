@@ -10,6 +10,7 @@ Current release snapshot:
 - Status: V1 demo-ready
 - Evidence: 2 cross-source `ready` single-model samples plus 1 hard-case `draft` family-catalog sample
 - Release notes: `RELEASE_NOTES_v0.1.0.md`
+- Author: [niwa414](https://github.com/niwa414)
 
 ## Interface snapshots
 
