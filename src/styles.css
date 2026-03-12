@@ -129,11 +129,42 @@ textarea:focus {
   letter-spacing: -0.06em;
 }
 
+.hero-topline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
 .hero-copy p {
   max-width: 42rem;
   margin: 0;
   color: var(--muted);
   font-size: 1.02rem;
+}
+
+.language-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem;
+  border: 1px solid var(--stroke);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.7);
+}
+
+.language-chip {
+  min-width: 3.2rem;
+  padding: 0.38rem 0.7rem;
+  border-radius: 999px;
+  color: var(--muted);
+  transition: background 140ms ease, color 140ms ease;
+}
+
+.language-chip.active {
+  background: rgba(15, 118, 103, 0.14);
+  color: var(--ink);
+  font-weight: 700;
 }
 
 .hero-panels {
@@ -797,6 +828,11 @@ th {
 
   .side-rail {
     position: static;
+  }
+
+  .hero-topline {
+    flex-direction: column;
+    align-items: flex-start;
   }
 }
 

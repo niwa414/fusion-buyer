@@ -1,6 +1,6 @@
-import { startTransition, useState, type ChangeEvent, type ReactNode } from 'react';
+import { startTransition, useEffect, useState, type ChangeEvent, type ReactNode } from 'react';
 
-import { projectInfo, suppliers } from './domain/data';
+import { suppliers } from './domain/data';
 import { analyzeAllParts, buildProjectMetrics } from './domain/engine';
 import {
   createPartAnalysisReport,
@@ -19,40 +19,34 @@ import { ingestPdfFile } from './ingest/pdf';
 import { preprocessHvCapacitorText } from './ingest/preprocess-hv-capacitor-text';
 import { analyzeNormalizedHvCapacitor } from './ingest/to-part-record';
 import type { BomInput, HvCapacitorExtractResult, IngestResult, NormalizedHvCapacitor } from './ingest/types';
+import {
+  appCopy,
+  formatRequiredFieldDetail,
+  getDefaultLanguage,
+  getDemoSampleCopy,
+  getExportCardCopy,
+  getNavItems,
+  getProjectInfoCopy,
+  getRiskAxes,
+  localizeKnownPartName,
+  localizeKnownPartSummary,
+  localizeSchemaGroups,
+  translateCategory,
+  translateDocumentKind,
+  translateFieldName,
+  translateIngestStatus,
+  translateParameterLevel,
+  translateQualityTier,
+  translateReadiness,
+  translateRecommendation,
+  translateReviewMessage,
+  type Language,
+} from './ui/localization';
 
 const demoAnalyses = analyzeAllParts();
 const demoMetrics = buildProjectMetrics();
 
-const navItems: { id: NavigationView; label: string; note: string }[] = [
-  { id: 'project', label: 'Project Board', note: 'program pulse' },
-  { id: 'parts', label: 'Part Detail', note: 'engineering to sourcing' },
-  { id: 'suppliers', label: 'Supplier Profiles', note: 'capability lens' },
-  { id: 'risks', label: 'Risk Board', note: 'critical path view' },
-  { id: 'exports', label: 'Export Center', note: 'report outputs' },
-];
-
 type RiskAxisKey = 'singleSource' | 'longLead' | 'specClarity' | 'processMaturity' | 'qualitySystem';
-
-const riskAxes: { key: RiskAxisKey; label: string }[] = [
-  { key: 'singleSource', label: 'Single source' },
-  { key: 'longLead', label: 'Long lead' },
-  { key: 'specClarity', label: 'Spec clarity' },
-  { key: 'processMaturity', label: 'Process maturity' },
-  { key: 'qualitySystem', label: 'Quality system' },
-];
-
-function recommendationLabel(value: RecommendationLevel) {
-  switch (value) {
-    case 'lead':
-      return 'Lead';
-    case 'backup':
-      return 'Backup';
-    case 'adjacent':
-      return 'Adjacent';
-    default:
-      return 'Watchlist';
-  }
-}
 
 function maxRisk(risk: RiskScore) {
   return Math.max(risk.singleSource, risk.longLead, risk.specClarity, risk.processMaturity, risk.qualitySystem);
@@ -96,8 +90,8 @@ function ScorePill(props: { score: number }) {
   return <span className={`score-pill ${tone}`}>{props.score}</span>;
 }
 
-function RecommendationPill(props: { value: RecommendationLevel }) {
-  return <span className={`recommendation-pill ${props.value}`}>{recommendationLabel(props.value)}</span>;
+function RecommendationPill(props: { value: RecommendationLevel; language: Language }) {
+  return <span className={`recommendation-pill ${props.value}`}>{translateRecommendation(props.value, props.language)}</span>;
 }
 
 function RiskScale(props: { label: string; value: number }) {
@@ -193,6 +187,7 @@ const defaultBomInput: BomInput = {
 };
 
 function App() {
+  const [language, setLanguage] = useState<Language>(getDefaultLanguage);
   const [view, setView] = useState<NavigationView>('project');
   const [selectedPartId, setSelectedPartId] = useState(demoAnalyses[0].part.id);
   const [selectedSupplierId, setSelectedSupplierId] = useState(suppliers[0].id);
@@ -206,6 +201,19 @@ function App() {
   const [generatedAnalysis, setGeneratedAnalysis] = useState<ReturnType<typeof analyzeNormalizedHvCapacitor>>(null);
   const [ingestError, setIngestError] = useState<string | null>(null);
   const [isIngesting, setIsIngesting] = useState(false);
+
+  useEffect(() => {
+    window.localStorage.setItem('fusion-buyer-language', language);
+  }, [language]);
+
+  const copy = appCopy[language];
+  const navItems = getNavItems(language);
+  const riskAxes = getRiskAxes(language) as { key: RiskAxisKey; label: string }[];
+  const projectCopy = getProjectInfoCopy(language);
+  const localizedPartSchema = localizeSchemaGroups(partSchema, language);
+  const localizedSupplierSchema = localizeSchemaGroups(supplierSchema, language);
+  const localizedRiskSchema = localizeSchemaGroups(riskSchema, language);
+  const localizedRfqSchema = localizeSchemaGroups(rfqSchema, language);
 
   const analyses = generatedAnalysis ? [generatedAnalysis, ...demoAnalyses] : demoAnalyses;
   const metrics = generatedAnalysis
@@ -228,34 +236,44 @@ function App() {
 
   const exportCards = [
     {
-      title: 'Part analysis report',
       filename: 'part-analysis-report.md',
-      description: 'Structured requirement cards, shortlist preview, and per-part risk.',
       content: createPartAnalysisReport(),
+      ...getExportCardCopy('part-analysis-report.md', language, {
+        title: 'Part analysis report',
+        description: 'Structured requirement cards, shortlist preview, and per-part risk.',
+      }),
     },
     {
-      title: 'Supplier shortlist',
       filename: 'supplier-shortlist.md',
-      description: 'Ranked supplier pool with reasons and gaps.',
       content: createSupplierShortlist(),
+      ...getExportCardCopy('supplier-shortlist.md', language, {
+        title: 'Supplier shortlist',
+        description: 'Ranked supplier pool with reasons and gaps.',
+      }),
     },
     {
-      title: 'RFQ pack',
       filename: 'rfq-pack.md',
-      description: 'Send-ready RFQ sections generated from structured data.',
       content: createRFQPack(),
+      ...getExportCardCopy('rfq-pack.md', language, {
+        title: 'RFQ pack',
+        description: 'Send-ready RFQ sections generated from structured data.',
+      }),
     },
     {
-      title: 'Project risk report',
       filename: 'project-risk-report.md',
-      description: 'Program-level risk summary and recommended actions.',
       content: createProjectRiskReport(),
+      ...getExportCardCopy('project-risk-report.md', language, {
+        title: 'Project risk report',
+        description: 'Program-level risk summary and recommended actions.',
+      }),
     },
     {
-      title: 'Supplier capability dump',
       filename: 'supplier-capability-dump.md',
-      description: 'Current demo supplier library and metadata.',
       content: createSupplierCapabilityDump(),
+      ...getExportCardCopy('supplier-capability-dump.md', language, {
+        title: 'Supplier capability dump',
+        description: 'Current demo supplier library and metadata.',
+      }),
     },
   ];
 
@@ -283,7 +301,7 @@ function App() {
       setIngestResult(result);
       setManualText(result.text);
     } catch (error) {
-      setIngestError(error instanceof Error ? error.message : 'Failed to ingest the PDF.');
+      setIngestError(error instanceof Error ? error.message : language === 'zh' ? 'PDF 导入失败。' : 'Failed to ingest the PDF.');
     } finally {
       setIsIngesting(false);
       event.target.value = '';
@@ -338,7 +356,9 @@ function App() {
         status: effectiveText ? 'ok' : 'empty_text_layer',
         text: effectiveText,
         pageCount: 0,
-        warnings: effectiveText ? ['Using manual text input without a PDF upload.'] : ['Paste text or upload a PDF to continue.'],
+        warnings: effectiveText
+          ? [language === 'zh' ? '未上传 PDF，当前使用手工文本输入。' : 'Using manual text input without a PDF upload.']
+          : [language === 'zh' ? '请粘贴文本或上传 PDF 后继续。' : 'Paste text or upload a PDF to continue.'],
         fileName: 'manual-text',
       } satisfies IngestResult);
 
@@ -353,11 +373,16 @@ function App() {
     }
 
     const nextBomInput = { ...defaultBomInput };
+    const demoCopy = getDemoSampleCopy(sample.id, language);
     const sampleIngest: IngestResult = {
       status: 'ok',
       text: sample.text,
       pageCount: 1,
-      warnings: [`Loaded demo sample: ${sample.label} (${sample.statusLabel}).`],
+      warnings: [
+        language === 'zh'
+          ? `已载入演示样本：${demoCopy.label}（${demoCopy.statusLabel}）。`
+          : `Loaded demo sample: ${sample.label} (${sample.statusLabel}).`,
+      ],
       fileName: sample.fileName,
     };
 
@@ -377,23 +402,41 @@ function App() {
 
       <header className="hero">
         <div className="hero-copy">
-          <span className="section-eyebrow">Chosen wedge</span>
-          <h1>{projectInfo.title}</h1>
-          <p>{projectInfo.objective}</p>
+          <div className="hero-topline">
+            <span className="section-eyebrow">{projectCopy.eyebrow}</span>
+            <div className="language-toggle" aria-label={copy.language}>
+              <button
+                type="button"
+                className={`language-chip ${language === 'en' ? 'active' : ''}`}
+                onClick={() => setLanguage('en')}
+              >
+                EN
+              </button>
+              <button
+                type="button"
+                className={`language-chip ${language === 'zh' ? 'active' : ''}`}
+                onClick={() => setLanguage('zh')}
+              >
+                中文
+              </button>
+            </div>
+          </div>
+          <h1>{projectCopy.title}</h1>
+          <p>{projectCopy.objective}</p>
         </div>
 
         <div className="hero-panels">
           <div className="hero-panel">
-            <span>Cluster</span>
-            <strong>{projectInfo.cluster}</strong>
+            <span>{projectCopy.clusterLabel}</span>
+            <strong>{projectCopy.cluster}</strong>
           </div>
           <div className="hero-panel">
-            <span>Customer profile</span>
-            <strong>{projectInfo.customer}</strong>
+            <span>{projectCopy.customerLabel}</span>
+            <strong>{projectCopy.customer}</strong>
           </div>
           <div className="hero-panel">
-            <span>Operating model</span>
-            <strong>Rules first, human in the loop</strong>
+            <span>{projectCopy.operatingModelLabel}</span>
+            <strong>{projectCopy.operatingModelValue}</strong>
           </div>
         </div>
       </header>
@@ -415,15 +458,19 @@ function App() {
       {view === 'project' ? (
         <main className="page-stack">
           <div className="metric-grid">
-            <MetricCard label="Analyzed parts" value={metrics.totalParts} hint="Current demo package" />
-            <MetricCard label="High-risk parts" value={metrics.highRiskCount} hint="Any axis >= 4" />
-            <MetricCard label="Single-source parts" value={metrics.singleSourceCount} hint="Lead source concentration" />
-            <MetricCard label="Need more information" value={metrics.needsInfoCount} hint="Open questions or missing docs" />
-            <MetricCard label="RFQ-ready parts" value={metrics.rfqReadyCount} hint="Complete file package today" />
+            <MetricCard label={copy.metrics.analyzedParts} value={metrics.totalParts} hint={copy.metrics.currentDemoPackage} />
+            <MetricCard label={copy.metrics.highRiskParts} value={metrics.highRiskCount} hint={copy.metrics.axisAtLeast4} />
+            <MetricCard label={copy.metrics.singleSourceParts} value={metrics.singleSourceCount} hint={copy.metrics.leadSourceConcentration} />
+            <MetricCard
+              label={copy.metrics.needMoreInformation}
+              value={metrics.needsInfoCount}
+              hint={copy.metrics.openQuestionsOrMissingDocs}
+            />
+            <MetricCard label={copy.metrics.rfqReadyParts} value={metrics.rfqReadyCount} hint={copy.metrics.completeFilePackageToday} />
           </div>
 
           <div className="two-column">
-            <Section title="Action queue" eyebrow="Program focus">
+            <Section title={copy.project.actionQueue} eyebrow={copy.project.programFocus}>
               <div className="stack-list">
                 {topActionQueue.map(({ part, risk }) => (
                   <button
@@ -434,129 +481,136 @@ function App() {
                       setSelectedPartId(part.id);
                       setView('parts');
                     }}
-                  >
-                    <div>
-                      <strong>
-                        {part.id} · {part.name}
-                      </strong>
-                      <p>{risk.explanation[0]}</p>
-                    </div>
-                    <span className={`risk-badge ${maxRisk(risk) >= 4 ? 'high' : 'mid'}`}>risk {maxRisk(risk)}/5</span>
-                  </button>
-                ))}
+                    >
+                      <div>
+                        <strong>
+                          {part.id} · {localizeKnownPartName(part, language)}
+                        </strong>
+                        <p>{risk.explanation[0]}</p>
+                      </div>
+                      <span className={`risk-badge ${maxRisk(risk) >= 4 ? 'high' : 'mid'}`}>
+                        {copy.project.riskShort} {maxRisk(risk)}/5
+                      </span>
+                    </button>
+                  ))}
               </div>
             </Section>
 
-            <Section title="What this MVP locks down" eyebrow="Scope discipline">
+            <Section title={copy.project.mvpLocksDown} eyebrow={copy.project.scopeDiscipline}>
               <div className="scope-copy">
-                <p>Part card schema, supplier capability schema, RFQ template, and five-axis risk model are all explicit.</p>
-                <p>
-                  This first cut avoids ERP integration, quoting automation, pricing logic, and approval workflow. It focuses on
-                  judgment support.
-                </p>
+                <p>{copy.project.scopeParagraphOne}</p>
+                <p>{copy.project.scopeParagraphTwo}</p>
               </div>
             </Section>
           </div>
 
-          <Section title="Field blueprint" eyebrow="Data backbone">
+          <Section title={copy.project.fieldBlueprint} eyebrow={copy.project.dataBackbone}>
             <div className="blueprint-grid">
-              <SchemaBlock title="Part schema" groups={partSchema} />
-              <SchemaBlock title="Supplier schema" groups={supplierSchema} />
-              <SchemaBlock title="Risk schema" groups={riskSchema} />
-              <SchemaBlock title="RFQ schema" groups={rfqSchema} />
+              <SchemaBlock title={copy.project.partSchema} groups={localizedPartSchema} />
+              <SchemaBlock title={copy.project.supplierSchema} groups={localizedSupplierSchema} />
+              <SchemaBlock title={copy.project.riskSchema} groups={localizedRiskSchema} />
+              <SchemaBlock title={copy.project.rfqSchema} groups={localizedRfqSchema} />
             </div>
           </Section>
 
-          <Section title="HV Capacitor Ingest" eyebrow="Real document to card">
+          <Section title={copy.project.ingestTitle} eyebrow={copy.project.realDocumentToCard}>
             <div className="two-column ingest-layout">
               <div className="ingest-panel">
-                <p className="muted">
-                  V1 ingest is intentionally narrow: one PDF plus light BOM/manual context, HV capacitor only, no OCR.
-                </p>
+                <p className="muted">{copy.project.ingestScope}</p>
 
                 <div className="demo-sample-block">
-                  <span className="meta-label">Demo samples</span>
+                  <span className="meta-label">{copy.project.demoSamples}</span>
                   <div className="demo-sample-grid">
                     {demoIngestSamples.map((sample) => (
-                      <button
-                        key={sample.id}
-                        type="button"
-                        className={`demo-sample-button ${selectedDemoSampleId === sample.id ? 'active' : ''}`}
-                        onClick={() => loadDemoSample(sample.id)}
-                      >
-                        <div>
-                          <strong>{sample.label}</strong>
-                          <p>{sample.note}</p>
-                        </div>
-                        <span className={`risk-badge ${sample.statusTone}`}>{sample.statusLabel}</span>
-                      </button>
+                      (() => {
+                        const sampleCopy = getDemoSampleCopy(sample.id, language);
+
+                        return (
+                          <button
+                            key={sample.id}
+                            type="button"
+                            className={`demo-sample-button ${selectedDemoSampleId === sample.id ? 'active' : ''}`}
+                            onClick={() => loadDemoSample(sample.id)}
+                          >
+                            <div>
+                              <strong>{sampleCopy.label}</strong>
+                              <p>{sampleCopy.note}</p>
+                            </div>
+                            <span className={`risk-badge ${sample.statusTone}`}>{sampleCopy.statusLabel}</span>
+                          </button>
+                        );
+                      })()
                     ))}
                   </div>
                 </div>
 
                 <label className="input-group">
-                  <span className="meta-label">Upload PDF</span>
+                  <span className="meta-label">{copy.project.uploadPdf}</span>
                   <input type="file" accept="application/pdf" onChange={handlePdfUpload} />
                 </label>
 
                 <div className="ingest-status-row">
                   <span className={`risk-badge ${ingestResult?.status === 'ok' ? 'low' : 'mid'}`}>
-                    {isIngesting ? 'parsing' : ingestResult?.status ?? 'idle'}
+                    {translateIngestStatus(isIngesting ? 'parsing' : ingestResult?.status ?? 'idle', language)}
                   </span>
-                  <small>{ingestResult ? `${ingestResult.fileName} · ${ingestResult.pageCount} pages` : 'No file loaded yet'}</small>
+                  <small>
+                    {ingestResult
+                      ? `${ingestResult.fileName} · ${ingestResult.pageCount} ${language === 'zh' ? '页' : 'pages'}`
+                      : copy.project.noFileLoaded}
+                  </small>
                 </div>
 
                 {ingestError ? <p className="error-copy">{ingestError}</p> : null}
 
                 <div className="form-grid">
                   <label className="input-group">
-                    <span className="meta-label">Part name</span>
+                    <span className="meta-label">{copy.project.partName}</span>
                     <input value={bomInput.partName ?? ''} onChange={(event) => handleBomInputChange('partName', event.target.value)} />
                   </label>
                   <label className="input-group">
-                    <span className="meta-label">Manufacturer</span>
+                    <span className="meta-label">{copy.project.manufacturer}</span>
                     <input value={bomInput.manufacturer ?? ''} onChange={(event) => handleBomInputChange('manufacturer', event.target.value)} />
                   </label>
                   <label className="input-group">
-                    <span className="meta-label">MPN</span>
+                    <span className="meta-label">{copy.project.mpn}</span>
                     <input value={bomInput.mpn ?? ''} onChange={(event) => handleBomInputChange('mpn', event.target.value)} />
                   </label>
                   <label className="input-group">
-                    <span className="meta-label">Quantity / batch</span>
+                    <span className="meta-label">{copy.project.quantityBatch}</span>
                     <input value={bomInput.quantity ?? ''} onChange={(event) => handleBomInputChange('quantity', event.target.value)} />
                   </label>
                   <label className="input-group">
-                    <span className="meta-label">Voltage kV</span>
+                    <span className="meta-label">{copy.project.voltageKv}</span>
                     <input value={bomInput.ratedVoltageKv ?? ''} onChange={(event) => handleBomInputChange('ratedVoltageKv', event.target.value)} />
                   </label>
                   <label className="input-group">
-                    <span className="meta-label">Capacitance uF</span>
+                    <span className="meta-label">{copy.project.capacitanceUf}</span>
                     <input value={bomInput.capacitanceUf ?? ''} onChange={(event) => handleBomInputChange('capacitanceUf', event.target.value)} />
                   </label>
                   <label className="input-group">
-                    <span className="meta-label">Mounting style</span>
+                    <span className="meta-label">{copy.project.mountingStyle}</span>
                     <input value={bomInput.mountingStyle ?? ''} onChange={(event) => handleBomInputChange('mountingStyle', event.target.value)} />
                   </label>
                   <label className="input-group">
-                    <span className="meta-label">Dimensions</span>
+                    <span className="meta-label">{copy.project.dimensions}</span>
                     <input value={bomInput.dimensions ?? ''} onChange={(event) => handleBomInputChange('dimensions', event.target.value)} />
                   </label>
                   <label className="input-group">
-                    <span className="meta-label">Target lead weeks</span>
+                    <span className="meta-label">{copy.project.targetLeadWeeks}</span>
                     <input
                       value={bomInput.targetLeadTimeWeeks ?? ''}
                       onChange={(event) => handleBomInputChange('targetLeadTimeWeeks', event.target.value)}
                     />
                   </label>
                   <label className="input-group">
-                    <span className="meta-label">Annual volume</span>
+                    <span className="meta-label">{copy.project.annualVolume}</span>
                     <input value={bomInput.annualVolume ?? ''} onChange={(event) => handleBomInputChange('annualVolume', event.target.value)} />
                   </label>
                 </div>
 
                 <div className="button-row">
                   <button type="button" className="primary-button" onClick={runHvCapacitorIngest}>
-                    Generate part card
+                    {copy.project.generatePartCard}
                   </button>
                   {generatedAnalysis ? (
                     <button
@@ -569,7 +623,7 @@ function App() {
                         })
                       }
                     >
-                      Open generated card
+                      {copy.project.openGeneratedCard}
                     </button>
                   ) : null}
                 </div>
@@ -577,64 +631,73 @@ function App() {
                 {normalizedResult ? (
                   <div className="ingest-summary">
                     <div>
-                      <span className="meta-label">Readiness</span>
-                      <strong>{normalizedResult.readiness}</strong>
+                      <span className="meta-label">{copy.project.readiness}</span>
+                      <strong>{translateReadiness(normalizedResult.readiness, language)}</strong>
                     </div>
                     <div>
-                      <span className="meta-label">Review issues</span>
+                      <span className="meta-label">{copy.project.reviewIssues}</span>
                       <strong>{normalizedResult.reviewIssues.length}</strong>
                     </div>
                     <div>
-                      <span className="meta-label">Generated card</span>
-                      <strong>{generatedAnalysis ? 'ready in workbench' : 'draft / insufficient extraction'}</strong>
+                      <span className="meta-label">{copy.project.generatedCard}</span>
+                      <strong>{generatedAnalysis ? copy.project.readyInWorkbench : copy.project.draftInsufficientExtraction}</strong>
                     </div>
                   </div>
                 ) : null}
 
                 {ingestReviewSummary ? (
                   <div className="review-summary-card">
-                    <h3>Review summary</h3>
+                    <h3>{copy.project.reviewSummary}</h3>
                     <div className="summary-grid">
                       <div>
-                        <span className="meta-label">Key fields</span>
+                        <span className="meta-label">{copy.project.keyFields}</span>
                         <ul className="bullet-list">
-                          <li>part_name: {normalizedResult?.partName ?? 'missing'}</li>
+                          <li>{translateFieldName('part_name', language)}: {normalizedResult?.partName ?? copy.common.missing}</li>
                           <li>
-                            rated_voltage_kv:{' '}
+                            {translateFieldName('rated_voltage_kv', language)}:{' '}
                             {normalizedResult?.ratedVoltageKv !== null && normalizedResult?.ratedVoltageKv !== undefined
                               ? `${normalizedResult.ratedVoltageKv} kV`
-                              : 'missing'}
+                              : copy.common.missing}
                           </li>
                           <li>
-                            capacitance_uf:{' '}
+                            {translateFieldName('capacitance_uf', language)}:{' '}
                             {normalizedResult?.capacitanceUf !== null && normalizedResult?.capacitanceUf !== undefined
                               ? `${normalizedResult.capacitanceUf} uF`
-                              : 'missing'}
+                              : copy.common.missing}
                           </li>
-                          <li>dimensions: {normalizedResult?.dimensions ?? 'missing'}</li>
+                          <li>{translateFieldName('dimensions', language)}: {normalizedResult?.dimensions ?? copy.common.missing}</li>
                         </ul>
                       </div>
                       <div>
-                        <span className="meta-label">Blocking issues</span>
+                        <span className="meta-label">{copy.project.blockingIssues}</span>
                         <ListBlock
-                          items={ingestReviewSummary.blockingIssues}
-                          emptyLabel="No blocking issues. This card can move forward."
+                          items={ingestReviewSummary.blockingIssues.map((issue) => translateReviewMessage(issue, language))}
+                          emptyLabel={translateReviewMessage('No blocking issues. This card can move forward.', language)}
                         />
                       </div>
                       <div>
-                        <span className="meta-label">Missing fields</span>
-                        <ListBlock items={ingestReviewSummary.missingFields} emptyLabel="No missing fields in current extractor pass." />
+                        <span className="meta-label">{copy.project.missingFields}</span>
+                        <ListBlock
+                          items={ingestReviewSummary.missingFields.map((field) => translateFieldName(field, language))}
+                          emptyLabel={translateReviewMessage('No missing fields in current extractor pass.', language)}
+                        />
                       </div>
                       <div>
-                        <span className="meta-label">Conflict fields</span>
-                        <ListBlock items={ingestReviewSummary.conflictFields} emptyLabel="No conflicting field values found." />
+                        <span className="meta-label">{copy.project.conflictFields}</span>
+                        <ListBlock
+                          items={ingestReviewSummary.conflictFields.map((field) => translateFieldName(field, language))}
+                          emptyLabel={translateReviewMessage('No conflicting field values found.', language)}
+                        />
                       </div>
                       <div>
-                        <span className="meta-label">Required fields</span>
+                        <span className="meta-label">{copy.project.requiredFields}</span>
                         <ul className="bullet-list">
                           {ingestReviewSummary.requiredFields.map((field) => (
                             <li key={field.field}>
-                              {field.satisfied ? '[ok]' : '[missing]'} {field.field}: {field.detail}
+                              {field.satisfied ? copy.common.ok : copy.common.missing} {translateFieldName(field.field, language)}:{' '}
+                              {normalizedResult
+                                ? formatRequiredFieldDetail(field.field, normalizedResult, language, field.satisfied)
+                                : field.detail}
                             </li>
                           ))}
                         </ul>
@@ -645,17 +708,15 @@ function App() {
               </div>
 
               <div className="ingest-panel">
-                <h3>Source text preview</h3>
-                <p className="muted">
-                  If the PDF has no useful text layer, paste the extracted text here and rerun the HV capacitor extractor.
-                </p>
+                <h3>{copy.project.sourceTextPreview}</h3>
+                <p className="muted">{copy.project.sourceTextHelp}</p>
                 <textarea
                   value={manualText}
                   onChange={(event) => {
                     setSelectedDemoSampleId(null);
                     setManualText(event.target.value);
                   }}
-                  placeholder="PDF text appears here. You can also paste manual text for unsupported PDFs."
+                  placeholder={copy.project.sourceTextPlaceholder}
                 />
                 {ingestWarnings.length > 0 ? (
                   <div className="warning-list">
@@ -670,28 +731,29 @@ function App() {
             </div>
 
             <div className="json-grid">
-              <JsonPreview title="Extract Result JSON" value={extractResult ?? { status: 'pending' }} />
-              <JsonPreview title="Normalized Result JSON" value={normalizedResult ?? { status: 'pending' }} />
+              <JsonPreview title={copy.project.extractJson} value={extractResult ?? { status: copy.project.pending }} />
+              <JsonPreview title={copy.project.normalizedJson} value={normalizedResult ?? { status: copy.project.pending }} />
             </div>
 
             {normalizedResult ? (
               <div className="two-column">
-                <Section title="Review queue" eyebrow="Human in the loop" className="nested-section">
+                <Section title={copy.project.reviewQueue} eyebrow={copy.project.humanInLoop} className="nested-section">
                   <ListBlock
                     items={normalizedResult.reviewIssues.map(
-                      (issue) => `${issue.blocking ? '[blocker]' : '[review]'} ${issue.field}: ${issue.message}`,
+                      (issue) =>
+                        `${issue.blocking ? copy.project.reviewIssuePrefixBlocker : copy.project.reviewIssuePrefixReview} ${translateFieldName(issue.field, language)}: ${translateReviewMessage(issue.message, language)}`,
                     )}
-                    emptyLabel="No review issues on this normalized card."
+                    emptyLabel={translateReviewMessage('No review issues on this normalized card.', language)}
                   />
                 </Section>
 
-                <Section title="Required fields gate" eyebrow="Readiness rule" className="nested-section">
+                <Section title={copy.project.requiredFieldsGate} eyebrow={copy.project.readinessRule} className="nested-section">
                   <ListBlock
                     items={[
-                      'part_name',
-                      'rated_voltage_kv',
-                      'capacitance_uf',
-                      'mounting_style or dimensions',
+                      translateFieldName('part_name', language),
+                      translateFieldName('rated_voltage_kv', language),
+                      translateFieldName('capacitance_uf', language),
+                      language === 'zh' ? '安装方式或尺寸' : 'mounting_style or dimensions',
                     ]}
                   />
                 </Section>
@@ -704,7 +766,7 @@ function App() {
       {view === 'parts' ? (
         <main className="workspace-layout">
           <aside className="side-rail">
-            <Section title="Parts" eyebrow="Current package">
+            <Section title={copy.parts.parts} eyebrow={copy.parts.currentPackage}>
               <div className="selector-list">
                 {analyses.map(({ part, risk }) => (
                   <button
@@ -717,8 +779,8 @@ function App() {
                       <strong>{part.id}</strong>
                       <span className={`risk-badge ${maxRisk(risk) >= 4 ? 'high' : 'mid'}`}>{maxRisk(risk)}/5</span>
                     </span>
-                    <p>{part.name}</p>
-                    <small>{part.category}</small>
+                    <p>{localizeKnownPartName(part, language)}</p>
+                    <small>{translateCategory(part.category, language)}</small>
                   </button>
                 ))}
               </div>
@@ -726,30 +788,33 @@ function App() {
           </aside>
 
           <div className="page-stack">
-            <Section title={`${selectedAnalysis.part.id} · ${selectedAnalysis.part.name}`} eyebrow="Structured requirement card">
-              <p className="lead-copy">{selectedAnalysis.part.summary}</p>
+            <Section
+              title={`${selectedAnalysis.part.id} · ${localizeKnownPartName(selectedAnalysis.part, language)}`}
+              eyebrow={copy.parts.structuredRequirementCard}
+            >
+              <p className="lead-copy">{localizeKnownPartSummary(selectedAnalysis.part, language)}</p>
               <div className="meta-grid">
                 <div>
-                  <span className="meta-label">Category</span>
-                  <strong>{selectedAnalysis.part.category}</strong>
+                  <span className="meta-label">{copy.parts.category}</span>
+                  <strong>{translateCategory(selectedAnalysis.part.category, language)}</strong>
                 </div>
                 <div>
-                  <span className="meta-label">Quality tier</span>
-                  <strong>{selectedAnalysis.part.qualityTier}</strong>
+                  <span className="meta-label">{copy.parts.qualityTier}</span>
+                  <strong>{translateQualityTier(selectedAnalysis.part.qualityTier, language)}</strong>
                 </div>
                 <div>
-                  <span className="meta-label">Target lead</span>
-                  <strong>{selectedAnalysis.part.targetLeadTimeWeeks} weeks</strong>
+                  <span className="meta-label">{copy.parts.targetLead}</span>
+                  <strong>{selectedAnalysis.part.targetLeadTimeWeeks} {copy.parts.weeks}</strong>
                 </div>
                 <div>
-                  <span className="meta-label">Annual volume</span>
+                  <span className="meta-label">{copy.parts.annualVolume}</span>
                   <strong>{selectedAnalysis.part.annualVolume}</strong>
                 </div>
               </div>
               <div className="document-grid">
                 {selectedAnalysis.part.documents.map((document) => (
                   <div key={document.name} className={`document-card ${document.status}`}>
-                    <span>{document.kind}</span>
+                    <span>{translateDocumentKind(document.kind, language)}</span>
                     <strong>{document.name}</strong>
                   </div>
                 ))}
@@ -757,11 +822,11 @@ function App() {
             </Section>
 
             <div className="two-column">
-              <Section title="Technical boundaries" eyebrow="Engineer to sourcing">
+              <Section title={copy.parts.technicalBoundaries} eyebrow={copy.parts.engineerToSourcing}>
                 <div className="parameter-grid">
                   {selectedAnalysis.part.criticalParameters.map((parameter) => (
                     <div key={parameter.label} className={`parameter-card ${parameter.level}`}>
-                      <span>{parameter.level}</span>
+                      <span>{translateParameterLevel(parameter.level, language)}</span>
                       <strong>{parameter.label}</strong>
                       <p>{parameter.value}</p>
                       <small>{parameter.rationale}</small>
@@ -770,21 +835,21 @@ function App() {
                 </div>
                 <div className="detail-columns">
                   <div>
-                    <h3>Process needs</h3>
+                    <h3>{copy.parts.processNeeds}</h3>
                     <TagList items={selectedAnalysis.part.processNeeds} />
                   </div>
                   <div>
-                    <h3>Tests</h3>
+                    <h3>{copy.parts.tests}</h3>
                     <TagList items={selectedAnalysis.part.testNeeds} />
                   </div>
                   <div>
-                    <h3>Quality</h3>
+                    <h3>{copy.parts.quality}</h3>
                     <TagList items={selectedAnalysis.part.qualityNeeds} />
                   </div>
                 </div>
               </Section>
 
-              <Section title="Risk radar" eyebrow="Program friction">
+              <Section title={copy.parts.riskRadar} eyebrow={copy.parts.programFriction}>
                 <div className="risk-stack">
                   {riskAxes.map((axis) => (
                     <RiskScale key={axis.key} label={axis.label} value={selectedAnalysis.risk[axis.key]} />
@@ -792,28 +857,28 @@ function App() {
                 </div>
                 <div className="detail-columns">
                   <div>
-                    <h3>Why</h3>
+                    <h3>{copy.parts.why}</h3>
                     <ListBlock items={selectedAnalysis.risk.explanation} />
                   </div>
                   <div>
-                    <h3>Suggested actions</h3>
+                    <h3>{copy.parts.suggestedActions}</h3>
                     <ListBlock items={selectedAnalysis.risk.actions} />
                   </div>
                 </div>
               </Section>
             </div>
 
-            <Section title="Supplier candidate pool" eyebrow="Rule-based shortlist">
+            <Section title={copy.parts.supplierCandidatePool} eyebrow={copy.parts.ruleBasedShortlist}>
               <div className="table-shell">
                 <table>
                   <thead>
                     <tr>
-                      <th>Order</th>
-                      <th>Supplier</th>
-                      <th>Score</th>
-                      <th>Recommendation</th>
-                      <th>Why it fits</th>
-                      <th>Gaps</th>
+                      <th>{copy.parts.order}</th>
+                      <th>{copy.parts.supplier}</th>
+                      <th>{copy.parts.score}</th>
+                      <th>{copy.parts.recommendation}</th>
+                      <th>{copy.parts.whyItFits}</th>
+                      <th>{copy.parts.gaps}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -836,10 +901,10 @@ function App() {
                           <ScorePill score={match.score} />
                         </td>
                         <td>
-                          <RecommendationPill value={match.recommendation} />
+                          <RecommendationPill value={match.recommendation} language={language} />
                         </td>
                         <td>{match.reasons.join(' ')}</td>
-                        <td>{match.missingConditions.join(' ') || 'No major gaps in this ruleset.'}</td>
+                        <td>{match.missingConditions.join(' ') || copy.parts.noMajorGaps}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -848,40 +913,37 @@ function App() {
             </Section>
 
             <div className="two-column">
-              <Section title="RFQ pack" eyebrow="Buyer-ready output">
+              <Section title={copy.parts.rfqPack} eyebrow={copy.parts.buyerReadyOutput}>
                 <div className="rfq-block">
                   <div>
-                    <h3>Summary</h3>
+                    <h3>{copy.parts.summary}</h3>
                     <p>{selectedAnalysis.rfq.summary}</p>
                   </div>
                   <div>
-                    <h3>Key parameters</h3>
+                    <h3>{copy.parts.keyParameters}</h3>
                     <ListBlock items={selectedAnalysis.rfq.keyParameters} />
                   </div>
                   <div>
-                    <h3>Checklist</h3>
+                    <h3>{copy.parts.checklist}</h3>
                     <ListBlock items={selectedAnalysis.rfq.confirmChecklist} />
                   </div>
                   <div>
-                    <h3>Clarifications</h3>
+                    <h3>{copy.parts.clarifications}</h3>
                     <ListBlock items={selectedAnalysis.rfq.clarificationQuestions} />
                   </div>
                   <div>
-                    <h3>Tests and acceptance</h3>
+                    <h3>{copy.parts.testsAndAcceptance}</h3>
                     <ListBlock items={selectedAnalysis.rfq.testsAndAcceptance} />
                   </div>
                   <div>
-                    <h3>File list</h3>
+                    <h3>{copy.parts.fileList}</h3>
                     <ListBlock items={selectedAnalysis.rfq.fileList} />
                   </div>
                 </div>
               </Section>
 
-              <Section title="Human in the loop" eyebrow="Manual override">
-                <p className="muted">
-                  AI extracts structure and proposes a shortlist. Engineering and sourcing still need a place to lock down final
-                  interpretation.
-                </p>
+              <Section title={copy.parts.manualOverride} eyebrow={copy.project.humanInLoop}>
+                <p className="muted">{copy.parts.humanLoopText}</p>
                 <textarea
                   value={notesByPart[selectedAnalysis.part.id] ?? ''}
                   onChange={(event) =>
@@ -890,7 +952,7 @@ function App() {
                       [selectedAnalysis.part.id]: event.target.value,
                     }))
                   }
-                  placeholder="Record sourcing judgement, approved substitutions, or supplier-specific caveats."
+                  placeholder={copy.parts.humanLoopPlaceholder}
                 />
               </Section>
             </div>
@@ -901,7 +963,7 @@ function App() {
       {view === 'suppliers' ? (
         <main className="workspace-layout">
           <aside className="side-rail">
-            <Section title="Supplier library" eyebrow="Demo capability pool">
+            <Section title={copy.suppliers.supplierLibrary} eyebrow={copy.suppliers.demoCapabilityPool}>
               <div className="selector-list">
                 {suppliers.map((supplier) => (
                   <button
@@ -915,7 +977,7 @@ function App() {
                       <small>{supplier.region}</small>
                     </span>
                     <p>{supplier.name}</p>
-                    <small>{supplier.fitCategories.join(' / ')}</small>
+                    <small>{supplier.fitCategories.map((category) => translateCategory(category, language)).join(' / ')}</small>
                   </button>
                 ))}
               </div>
@@ -923,73 +985,73 @@ function App() {
           </aside>
 
           <div className="page-stack">
-            <Section title={selectedSupplier.name} eyebrow="Capability profile">
+            <Section title={selectedSupplier.name} eyebrow={copy.suppliers.capabilityProfile}>
               <div className="meta-grid">
                 <div>
-                  <span className="meta-label">Region</span>
+                  <span className="meta-label">{copy.suppliers.region}</span>
                   <strong>{selectedSupplier.region}</strong>
                 </div>
                 <div>
-                  <span className="meta-label">Prototype lead</span>
-                  <strong>{selectedSupplier.prototypeLeadTimeWeeks} weeks</strong>
+                  <span className="meta-label">{copy.suppliers.prototypeLead}</span>
+                  <strong>{selectedSupplier.prototypeLeadTimeWeeks} {copy.parts.weeks}</strong>
                 </div>
                 <div>
-                  <span className="meta-label">Production lead</span>
-                  <strong>{selectedSupplier.productionLeadTimeWeeks} weeks</strong>
+                  <span className="meta-label">{copy.suppliers.productionLead}</span>
+                  <strong>{selectedSupplier.productionLeadTimeWeeks} {copy.parts.weeks}</strong>
                 </div>
                 <div>
-                  <span className="meta-label">Typical lot</span>
+                  <span className="meta-label">{copy.suppliers.typicalLot}</span>
                   <strong>{selectedSupplier.typicalLot}</strong>
                 </div>
               </div>
 
               <div className="detail-columns">
                 <div>
-                  <h3>Industries</h3>
+                  <h3>{copy.suppliers.industries}</h3>
                   <TagList items={selectedSupplier.industries} />
                 </div>
                 <div>
-                  <h3>Fit categories</h3>
-                  <TagList items={selectedSupplier.fitCategories} />
+                  <h3>{copy.suppliers.fitCategories}</h3>
+                  <TagList items={selectedSupplier.fitCategories.map((category) => translateCategory(category, language))} />
                 </div>
                 <div>
-                  <h3>Stage capability</h3>
+                  <h3>{copy.suppliers.stageCapability}</h3>
                   <TagList items={selectedSupplier.stageCapabilities} />
                 </div>
               </div>
 
               <div className="detail-columns">
                 <div>
-                  <h3>Process tags</h3>
+                  <h3>{copy.suppliers.processTags}</h3>
                   <TagList items={selectedSupplier.processTags} />
                 </div>
                 <div>
-                  <h3>Material tags</h3>
+                  <h3>{copy.suppliers.materialTags}</h3>
                   <TagList items={selectedSupplier.materialTags} />
                 </div>
                 <div>
-                  <h3>Quality systems</h3>
+                  <h3>{copy.suppliers.qualitySystems}</h3>
                   <TagList items={selectedSupplier.qualitySystems} />
                 </div>
               </div>
 
               <div className="detail-columns">
                 <div>
-                  <h3>Strengths</h3>
+                  <h3>{copy.suppliers.strengths}</h3>
                   <ListBlock items={selectedSupplier.strengths} />
                 </div>
                 <div>
-                  <h3>Cautions</h3>
+                  <h3>{copy.suppliers.cautions}</h3>
                   <ListBlock items={selectedSupplier.cautions} />
                 </div>
                 <div>
-                  <h3>Envelope</h3>
+                  <h3>{copy.suppliers.envelope}</h3>
                   <p>{selectedSupplier.sizeEnvelope}</p>
                 </div>
               </div>
             </Section>
 
-            <Section title="Best-fit parts" eyebrow="Where to use this supplier">
+            <Section title={copy.suppliers.bestFitParts} eyebrow={copy.suppliers.whereToUseThisSupplier}>
               <div className="stack-list">
                 {supplierPartFits.map(({ part, match, risk }) => (
                   <button
@@ -1000,18 +1062,18 @@ function App() {
                       setSelectedPartId(part.id);
                       setView('parts');
                     }}
-                  >
-                    <div>
-                      <strong>
-                        {part.id} · {part.name}
-                      </strong>
-                      <p>{match.reasons.join(' ')}</p>
-                    </div>
-                    <div className="list-row-meta">
-                      <ScorePill score={match.score} />
-                      <span className={`risk-badge ${maxRisk(risk) >= 4 ? 'high' : 'mid'}`}>risk {maxRisk(risk)}/5</span>
-                    </div>
-                  </button>
+                    >
+                      <div>
+                        <strong>
+                          {part.id} · {localizeKnownPartName(part, language)}
+                        </strong>
+                        <p>{match.reasons.join(' ')}</p>
+                      </div>
+                      <div className="list-row-meta">
+                        <ScorePill score={match.score} />
+                        <span className={`risk-badge ${maxRisk(risk) >= 4 ? 'high' : 'mid'}`}>{copy.project.riskShort} {maxRisk(risk)}/5</span>
+                      </div>
+                    </button>
                 ))}
               </div>
             </Section>
@@ -1021,13 +1083,13 @@ function App() {
 
       {view === 'risks' ? (
         <main className="page-stack">
-          <Section title="Critical path board" eyebrow="Per-risk sorting">
+          <Section title={copy.risks.criticalPathBoard} eyebrow={copy.risks.perRiskSorting}>
             <div className="risk-board-grid">
               {riskAxes.map((axis) => (
                 <div key={axis.key} className="risk-board-column">
                   <div className="risk-board-header">
                     <h3>{axis.label}</h3>
-                    <small>ranked high to low</small>
+                    <small>{copy.risks.rankedHighToLow}</small>
                   </div>
                   {analyses
                     .slice()
@@ -1044,7 +1106,7 @@ function App() {
                       >
                         <div>
                           <strong>{part.id}</strong>
-                          <p>{part.name}</p>
+                          <p>{localizeKnownPartName(part, language)}</p>
                         </div>
                         <span className={`risk-badge ${risk[axis.key] >= 4 ? 'high' : risk[axis.key] >= 3 ? 'mid' : 'low'}`}>
                           {risk[axis.key]}/5
@@ -1057,12 +1119,12 @@ function App() {
           </Section>
 
           <div className="two-column">
-            <Section title="Program actions" eyebrow="What to do next">
+            <Section title={copy.risks.programActions} eyebrow={copy.risks.whatToDoNext}>
               <div className="stack-list">
                 {topActionQueue.map(({ part, risk }) => (
                   <div key={part.id} className="action-card">
                     <strong>
-                      {part.id} · {part.name}
+                      {part.id} · {localizeKnownPartName(part, language)}
                     </strong>
                     <ListBlock items={risk.actions} />
                   </div>
@@ -1070,10 +1132,10 @@ function App() {
               </div>
             </Section>
 
-            <Section title="Risk model notes" eyebrow="MVP logic">
+            <Section title={copy.risks.riskModelNotes} eyebrow={copy.risks.mvpLogic}>
               <div className="scope-copy">
-                <p>Scores are deterministic and auditable. They come from shortlist depth, lead-time fit, spec completeness, process coverage, and quality evidence.</p>
-                <p>The point is not perfect prediction. The point is to surface where engineering and sourcing need to intervene before RFQ churn starts.</p>
+                <p>{copy.risks.modelNoteOne}</p>
+                <p>{copy.risks.modelNoteTwo}</p>
               </div>
             </Section>
           </div>
@@ -1082,7 +1144,7 @@ function App() {
 
       {view === 'exports' ? (
         <main className="page-stack">
-          <Section title="Export center" eyebrow="Shareable outputs">
+          <Section title={copy.exports.exportCenter} eyebrow={copy.exports.shareableOutputs}>
             <div className="export-grid">
               {exportCards.map((card) => (
                 <div key={card.filename} className="export-card">
@@ -1091,7 +1153,7 @@ function App() {
                     <p>{card.description}</p>
                   </div>
                   <button type="button" className="primary-button" onClick={() => downloadText(card.filename, card.content)}>
-                    Download
+                    {copy.exports.download}
                   </button>
                   <pre>{card.content.split('\n').slice(0, 10).join('\n')}</pre>
                 </div>
