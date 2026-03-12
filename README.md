@@ -1,6 +1,15 @@
 # Fusion Buyer MVP
 
-Pulse power procurement intelligence desk for advanced equipment teams.
+HV capacitor procurement intelligence workbench for engineering and sourcing teams.
+
+This repo demonstrates a narrow but real MVP wedge: take de-identified `HV Capacitor` text, extract structured sourcing fields, gate readiness, and push the result into a part card, supplier matching, risk scoring, and RFQ workflow.
+
+Current release snapshot:
+
+- Scope: `HV Capacitor` only
+- Status: V1 demo-ready
+- Evidence: 2 cross-source `ready` single-model samples plus 1 hard-case `draft` family-catalog sample
+- Release notes: `RELEASE_NOTES_v0.1.0.md`
 
 ## What this repo includes
 
