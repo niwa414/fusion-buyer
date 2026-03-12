@@ -11,6 +11,13 @@ Current release snapshot:
 - Evidence: 2 cross-source `ready` single-model samples plus 1 hard-case `draft` family-catalog sample
 - Release notes: `RELEASE_NOTES_v0.1.0.md`
 
+## Interface snapshots
+
+| Ready single-model path | Hard-case ambiguous path |
+| --- | --- |
+| ![Ready sample B demo](docs/demo-ready-sample-b.png) | ![Hard-case family catalog demo](docs/demo-hard-case-draft.png) |
+| `Ready sample B` shows cross-source single-model extraction reaching `ready` with usable key fields and no blocking issues. | `Hard case draft` shows family-catalog ambiguity staying `draft` with explicit blocking guidance instead of a guessed card. |
+
 ## What this repo includes
 
 - A Vite + React single-page demo for the first MVP wedge.
