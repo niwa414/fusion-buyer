@@ -1,0 +1,46 @@
+{
+  "sourceFileName": "hv-capacitor-single-model-anchor.txt",
+  "category": "HV Capacitor",
+  "partName": "KVX01S104K0T",
+  "manufacturer": null,
+  "mpn": null,
+  "quantity": null,
+  "ratedVoltageKv": 1,
+  "capacitanceUf": 0.1,
+  "pulseCurrentKa": null,
+  "dvDt": null,
+  "esrMohm": null,
+  "coolingType": "unknown",
+  "mountingStyle": null,
+  "dimensions": "1.81 x 1.47 x 0.17 inches",
+  "lifecycleOrPulseCount": "Guaranteed for 10 Years",
+  "targetLeadTimeWeeks": 16,
+  "annualVolume": 24,
+  "batchSize": "2-6 units",
+  "qualityTier": "Advanced Hardware",
+  "notes": null,
+  "missingNotes": [
+    {
+      "field": "pulse_current_ka",
+      "reason": "not_found"
+    },
+    {
+      "field": "dv_dt",
+      "reason": "not_found"
+    },
+    {
+      "field": "esr_mohm",
+      "reason": "not_found"
+    },
+    {
+      "field": "cooling_type",
+      "reason": "not_found"
+    },
+    {
+      "field": "mounting_style",
+      "reason": "not_found"
+    }
+  ],
+  "reviewIssues": [],
+  "readiness": "ready"
+}

@@ -1,0 +1,14 @@
+Manufacturer: Exxelia Alcon
+Series: KPF-9
+Product: Snubber Capacitor with Axial Leads
+Part Number: SI0U0473000AI0BC0AXLK01
+Rated Voltage: 3000 VDC
+Capacitance: 0.047 uF
+Dimensions: 12.0 x 19.0 x 46.0 mm
+Lead Diameter: 1.0 mm
+Case Code: BC
+dV/dt: 1200 V/us
+I Peak: 56 A
+Irms Max at 100 kHz and 70 C: 6.8 A
+Typical ESR at 100 kHz: 12 mOhm
+Source: Exxelia KPF-9 datasheet, July 2024

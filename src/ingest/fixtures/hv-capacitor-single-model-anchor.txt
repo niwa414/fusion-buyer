@@ -1,0 +1,39 @@
+Type KVx, High-Voltage and Pulse, Mica-Paper/Polymer Capacitors
+Catalog Number: KVX01S104K0T
+Case Dimensions
+Inches
+Length
+Width Height
+LMAX WMAX HMAX
+Max.
+PRF
+Max.
+IPEAK
+1 kVdc (500 V repetitive)
+0.047
+0.10
+0.22
+0.47
+0.68
+KVX01S473K0T
+KVX01S104K0T
+KVX01S224K0T
+KVX01S474K0T
+KVX01S105K0T
+1.81 1.02 0.14
+1.81
+1.47 0.17
+2.06 1.74 0.24
+3.06 1.98 0.24
+3.56 2.04 0.27
+14000
+9500
+6000
+4500
+3800
+40
+50
+60
+100
+150
+Operating Life Guaranteed for 10 Years

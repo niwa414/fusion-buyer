@@ -1,0 +1,97 @@
+TDK Electronics AG 2024
+Aluminum electrolytic capacitors
+Capacitors for pulse applications
+Series/Type: B43417
+Date: February 2024
+
+2 2/24
+Please read Cautions and warnings and
+Important notes at the end of this document.
+Capacitors for pulse applications B43417
+Compact - up to 60 C
+Applications
+- Medical appliances
+Terminals
+- Standard version with 2 terminals,
+2 lengths available: 6.3 and 4.5 mm
+- 3 terminals to ensure correct insertion: length 4.5 mm
+
+3 2/24
+Please read Cautions and warnings and
+Important notes at the end of this document.
+Capacitors for pulse applications B43417
+Compact - up to 60 C
+Specifications and characteristics in brief
+Rated voltage V R 300 ... 400 V DC
+Rated capacitance C R 170...1650 u F
+Capacitance tolerance +/-10% = K
+Useful life
+> 100000 discharges at: Requirements:
+Case temperature <= 60 C
+Charge resistance > 10 Ohm
+Discharge resistance > 2 Ohm
+
+4 2/24
+Please read Cautions and warnings and
+Important notes at the end of this document.
+Capacitors for pulse applications B43417
+Compact - up to 60 C
+Dimensional drawings
+Snap-in terminals (2 terminals, 4.5 mm)
+Dimensions (mm) Approx. Packing units
+d +1 l +2/-2 weight (g) (pcs.)
+22
+25
+13
+130
+
+6 2/24
+Please read Cautions and warnings and
+Important notes at the end of this document.
+Capacitors for pulse applications B43417
+Compact - up to 60 C
+Overview of available types
+VR (V DC) 300 350 400
+Case dimensions d x l (mm)
+CR (uF)
+170 22 x 25
+210 22 x 25
+220 22 x 30
+
+8 2/24
+Please read Cautions and warnings and
+Important notes at the end of this document.
+Capacitors for pulse applications B43417
+Compact - up to 60 C
+Technical data and ordering codes
+Composition of ordering code
+CR
+100 Hz
+20 C
+uF
+Case dimensions
+d x l
+mm
+Ordering code
+VR = 300 V DC
+250 22 x 25 B43417A3257K05#
+
+13 2/24
+Please read Cautions and warnings and
+Important notes at the end of this document.
+Capacitors for pulse applications B43417
+Compact - up to 60 C
+Product safety
+The table below summarizes the safety instructions that must be observed without fail.
+description can be found in the relevant sections of seperate file chapter "General technical infor-
+mation".
+
+15 2/24
+Please read Cautions and warnings and
+Important notes at the end of this document.
+Capacitors for pulse applications B43417
+Compact - up to 60 C
+Symbols and terms
+Symbol English German
+C Capacitance Kapazitat
+VR Rated voltage, DC voltage Nennspannung, Gleichspannung

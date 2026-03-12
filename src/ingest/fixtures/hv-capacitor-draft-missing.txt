@@ -1,0 +1,7 @@
+Part Name: Prototype Pulse Capacitor Candidate
+Manufacturer: Lab Sample House
+Capacitance: 8.2 uF
+Cooling Type: oil filled can
+Notes:
+Prototype article for evaluation.
+Mechanical outline to be confirmed after packaging review.

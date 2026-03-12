@@ -1,0 +1,26 @@
+{
+  "name": "fusion-buyer",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "calibrate:ingest": "tsx scripts/calibrate-ingest.ts",
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "validate:ingest": "tsx scripts/validate-ingest.ts",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "pdfjs-dist": "^5.5.207",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1"
+  },
+  "devDependencies": {
+    "@types/react": "^19.1.10",
+    "@types/react-dom": "^19.1.7",
+    "@vitejs/plugin-react": "^5.0.2",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.2",
+    "vite": "^7.1.3"
+  }
+}

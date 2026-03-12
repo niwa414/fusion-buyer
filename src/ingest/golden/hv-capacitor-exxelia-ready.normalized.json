@@ -1,0 +1,46 @@
+{
+  "sourceFileName": "hv-capacitor-exxelia-ready.txt",
+  "category": "HV Capacitor",
+  "partName": "Snubber Capacitor with Axial Leads",
+  "manufacturer": null,
+  "mpn": null,
+  "quantity": null,
+  "ratedVoltageKv": 3,
+  "capacitanceUf": 0.047,
+  "pulseCurrentKa": null,
+  "dvDt": 1.2,
+  "esrMohm": null,
+  "coolingType": "unknown",
+  "mountingStyle": null,
+  "dimensions": "12.0 x 19.0 x 46.0 mm",
+  "lifecycleOrPulseCount": null,
+  "targetLeadTimeWeeks": 16,
+  "annualVolume": 24,
+  "batchSize": "2-6 units",
+  "qualityTier": "Pulse Power / Critical",
+  "notes": null,
+  "missingNotes": [
+    {
+      "field": "pulse_current_ka",
+      "reason": "not_found"
+    },
+    {
+      "field": "esr_mohm",
+      "reason": "not_found"
+    },
+    {
+      "field": "cooling_type",
+      "reason": "not_found"
+    },
+    {
+      "field": "mounting_style",
+      "reason": "not_found"
+    },
+    {
+      "field": "lifecycle_or_pulse_count",
+      "reason": "not_found"
+    }
+  ],
+  "reviewIssues": [],
+  "readiness": "ready"
+}

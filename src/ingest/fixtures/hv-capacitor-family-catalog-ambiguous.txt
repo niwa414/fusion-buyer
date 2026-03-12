@@ -1,0 +1,35 @@
+Type KVx, High-Voltage and Pulse, Mica-Paper/Polymer Capacitors
+Applications
+- HV Power Supplies
+- Pulse-forming Networks
+Performance Highlights
+- Capacitance Range: 1pF to 10 µF
+- Voltage Range: 100 V to 150 kVdc
+- Temperature Range: -55°C to 125°C standard
+
+Ratings
+Cap. µF
+Catalog Number
+Case Dimensions
+1 kVdc (500 V repetitive)
+0.047
+0.10
+0.22
+2 kVdc (1 kV repetitive)
+0.033
+0.68
+1.0
+3 kVdc (1.5 kV repetitive)
+0.010
+0.022
+0.33
+
+Specifications
+Outline Drawings
+Operating Life Guaranteed for 10 Years
+Life Test: Subject capacitors to rated maximum conditions.
+product warranty
+
+Ordering Information
+10 = 10kV 471 = 470pF 0 = -55°C to 125°C
+05 = 5kV 472 = 4700pF 1 = -65°C to 125°C

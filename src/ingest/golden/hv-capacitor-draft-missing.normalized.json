@@ -1,0 +1,77 @@
+{
+  "sourceFileName": "hv-capacitor-draft-missing.txt",
+  "category": "HV Capacitor",
+  "partName": "Prototype Pulse Capacitor Candidate",
+  "manufacturer": null,
+  "mpn": null,
+  "quantity": null,
+  "ratedVoltageKv": null,
+  "capacitanceUf": 8.2,
+  "pulseCurrentKa": null,
+  "dvDt": null,
+  "esrMohm": null,
+  "coolingType": "oil",
+  "mountingStyle": null,
+  "dimensions": null,
+  "lifecycleOrPulseCount": null,
+  "targetLeadTimeWeeks": 16,
+  "annualVolume": 24,
+  "batchSize": "2-6 units",
+  "qualityTier": "Advanced Hardware",
+  "notes": null,
+  "missingNotes": [
+    {
+      "field": "rated_voltage_kv",
+      "reason": "not_found"
+    },
+    {
+      "field": "pulse_current_ka",
+      "reason": "not_found"
+    },
+    {
+      "field": "dv_dt",
+      "reason": "not_found"
+    },
+    {
+      "field": "esr_mohm",
+      "reason": "not_found"
+    },
+    {
+      "field": "mounting_style",
+      "reason": "not_found"
+    },
+    {
+      "field": "dimensions",
+      "reason": "not_found"
+    },
+    {
+      "field": "lifecycle_or_pulse_count",
+      "reason": "not_found"
+    },
+    {
+      "field": "rated_voltage_kv",
+      "reason": "required_missing",
+      "detail": "Rated voltage is required for HV capacitor matching."
+    },
+    {
+      "field": "mounting_envelope",
+      "reason": "required_missing",
+      "detail": "Need either mounting style or dimensions to create a sourcing-ready card."
+    }
+  ],
+  "reviewIssues": [
+    {
+      "field": "rated_voltage_kv",
+      "reason": "required_missing",
+      "message": "Rated voltage is required for HV capacitor matching.",
+      "blocking": true
+    },
+    {
+      "field": "mounting_envelope",
+      "reason": "required_missing",
+      "message": "Need either mounting style or dimensions to create a sourcing-ready card.",
+      "blocking": true
+    }
+  ],
+  "readiness": "draft"
+}

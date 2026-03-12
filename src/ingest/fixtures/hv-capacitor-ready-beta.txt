@@ -1,0 +1,14 @@
+Description: HelioCap HC18-15000 Fast Pulse Capacitor
+Series: HC18
+Voltage Rating - 18000 V
+Capacitance - 15000 nF
+Peak Discharge Current - 120000 A
+Maximum dV/dT - 35000 V/us
+ESR - 0.0022 ohm
+Cooling: passive self-cooled enclosure
+Terminal Type: busbar interface
+Outline: 280 mm x 95 mm x 180 mm
+Expected Life: 75000 pulses
+
+Additional information:
+Designed for repetitive pulsed discharge service.

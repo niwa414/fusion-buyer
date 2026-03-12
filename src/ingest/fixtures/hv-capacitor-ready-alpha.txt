@@ -1,0 +1,16 @@
+Part Name: AtlasPulse APX-25-22 Pulse Discharge Capacitor
+Manufacturer: AtlasPulse Energy
+Model: APX-25-22
+Rated Voltage: 25 kVDC
+Nominal Capacitance: 22 uF
+Peak Current: 180 kA
+dV/dt: 45 kV/us
+Equivalent Series Resistance: 1.8 mOhm
+Cooling Type: Oil filled
+Mounting Style: Stud bracket
+Dimensions: 320 x 120 x 210 mm
+Pulse Life: 100,000 shots at rated current
+
+Notes:
+Low inductance internal foil design.
+Lot traceability required for all production units.
